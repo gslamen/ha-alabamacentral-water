@@ -249,7 +249,7 @@ def parse_bill_text(text: str) -> Bill:
         "meter readings",
     )
     water = _search(rf"TOTAL Water Charges\s*({_MONEY})", text, "water charges")
-    sewer = _search(rf"TOTAL Sewer Charges\s*({_MONEY})", text, "sewer charges")
+    sewer_charges, sewer_line_items = _sewer(text)
     return Bill(
         invoice_date=_date(invoice[1]),
         due_date=_date(due[1]),
@@ -263,12 +263,32 @@ def parse_bill_text(text: str) -> Bill:
         present_read_date=_date(meter[5]),
         consumption=_number(meter[6]),
         water_charges=_money(water[1]),
-        sewer_charges=_money(sewer[1]),
+        sewer_charges=sewer_charges,
         # Headings are upper case ("CAW WATER CHARGES" / "BWWB WATER CHARGES");
         # the TOTAL lines are mixed case, so the case-sensitive match can't confuse them.
         water_line_items=_line_items(text, r"[A-Z]+ WATER CHARGES", "TOTAL Water Charges"),
-        sewer_line_items=_line_items(text, r"[A-Z ]+ SEWER CHARGES", "TOTAL Sewer Charges"),
+        sewer_line_items=sewer_line_items,
     )
+
+
+_SEWER_HEADING = r"[A-Z ]+ SEWER CHARGES"
+_SEWER_TOTAL = "TOTAL Sewer Charges"
+
+
+def _sewer(text: str) -> tuple[float, tuple[LineItem, ...]]:
+    """Sewer total and line items; zero for water-only (septic) accounts.
+
+    A statement with neither the sewer section heading nor its TOTAL line is a
+    water-only bill. If only one of the two is present the statement is
+    malformed, so it still fails rather than silently reporting no sewer.
+    """
+    total = re.search(rf"{_SEWER_TOTAL}\s*({_MONEY})", text)
+    has_heading = re.search(_SEWER_HEADING, text) is not None
+    if total is None and not has_heading:
+        return 0.0, ()
+    if total is None:
+        raise PortalParseError("statement: sewer charges not found")
+    return _money(total[1]), _line_items(text, _SEWER_HEADING, _SEWER_TOTAL)
 
 
 def parse_bill_pdf(data: bytes) -> Bill:

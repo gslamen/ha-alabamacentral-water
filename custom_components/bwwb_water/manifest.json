@@ -1,9 +1,9 @@
 {
   "domain": "bwwb_water",
   "name": "Central Alabama Water",
-  "version": "2.0.0",
-  "documentation": "https://github.com/Space-C0wboy/ha-bwwb-water",
-  "issue_tracker": "https://github.com/Space-C0wboy/ha-bwwb-water/issues",
+  "version": "2.0.1",
+  "documentation": "https://github.com/gslamen/ha-alabamacentral-water",
+  "issue_tracker": "https://github.com/gslamen/ha-alabamacentral-water/issues",
   "requirements": ["beautifulsoup4>=4.12", "pypdf>=5.0"],
   "dependencies": ["recorder"],
   "codeowners": ["@Space-C0wboy"],

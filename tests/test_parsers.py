@@ -222,3 +222,25 @@ def test_parse_bill_pdf_wraps_unexpected_text_errors(monkeypatch):
     monkeypatch.setattr("custom_components.bwwb_water.parsers.parse_bill_text", boom)
     with pytest.raises(PortalParseError):
         parse_bill_pdf(b"%PDF")
+
+
+def test_parse_bill_without_sewer_septic():
+    """Septic customers get water-only statements; sewer is reported as zero."""
+    bill = parse_bill_text(load_fixture("bill_caw_septic.txt"))
+    assert (bill.invoice_date, bill.due_date, bill.total_due) == (
+        date(2026, 9, 2),
+        date(2026, 9, 16),
+        43.97,
+    )
+    assert (bill.previous_read, bill.present_read, bill.consumption) == (935.0, 939.0, 4.0)
+    assert (bill.water_charges, bill.sewer_charges) == (43.97, 0.0)
+    assert bill.sewer_line_items == ()
+    assert len(bill.water_line_items) == 4
+    assert bill_from_dict(bill_to_dict(bill)) == bill
+
+
+def test_parse_bill_sewer_heading_without_total_still_fails():
+    """A sewer section with no TOTAL line is malformed, not a water-only bill."""
+    text = load_fixture("bill_caw.txt").replace("TOTAL Sewer Charges $56.02", "")
+    with pytest.raises(PortalParseError, match="sewer charges not found"):
+        parse_bill_text(text)
