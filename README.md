@@ -10,7 +10,7 @@ Birmingham Water Works Board became **Central Alabama Water** in 2026 and moved 
 
 ## Installation
 
-1. HACS → Integrations → ⋮ → Custom repositories → add `https://github.com/Space-C0wboy/ha-bwwb-water` (Integration).
+1. HACS → Integrations → ⋮ → Custom repositories → add `https://github.com/gslamen/ha-alabamacentral-water` (Integration).
 2. Install **Central Alabama Water**, restart Home Assistant.
 3. Settings → Devices & services → Add integration → **Central Alabama Water** → enter your portal username and password.
 
@@ -29,7 +29,7 @@ Upgrading from v1: just update and restart. The existing entry migrates automati
 | Last Bill Amount | USD | Attributes: `bill_date`, `due_date` |
 | Last Bill Due Date | date | |
 | Water Charges | USD | Latest bill's water total; attribute `line_items` |
-| Sewer Charges | USD | Latest bill's Jefferson County sewer total; attribute `line_items` |
+| Sewer Charges | USD | Latest bill's Jefferson County sewer total (0 for septic / water-only accounts); attribute `line_items` |
 | Scheduled Payment | — | e.g. `Waiting for bill`; last payment in attributes |
 | Days Until Due | d | `0` when nothing is owed (attribute `paid: true`); negative when past due |
 
